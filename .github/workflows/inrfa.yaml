@@ -11,6 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      id-token: write   # مهم لـ OIDC
 
     env:
       TF_IN_AUTOMATION: "true"
@@ -18,43 +19,33 @@ jobs:
       ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
       ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
       ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-      ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+      # لا تستخدمي ARM_CLIENT_SECRET مع OIDC
 
     steps:
-      # Checkout repo
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      # Azure login using Service Principal + secret
-      - name: Azure Login (Service Principal)
-        uses: azure/login@v1
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
         with:
           client-id: ${{ secrets.ARM_CLIENT_ID }}
           tenant-id: ${{ secrets.ARM_TENANT_ID }}
           subscription-id: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-          client-secret: ${{ secrets.ARM_CLIENT_SECRET }}
           allow-no-subscriptions: true
-          enable-AzPSSession: false
 
-      # Setup Terraform CLI
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
-      # Initialize Terraform
       - name: Terraform Init
         working-directory: infra
         run: terraform init -upgrade
 
-      # Run Terraform plan
       - name: Terraform Plan
         id: plan
         working-directory: infra
         run: |
-          set -e
           terraform plan -out=plan.tfplan -no-color -detailed-exitcode || echo "exit_code=$?" >> $GITHUB_OUTPUT
           terraform show -no-color plan.tfplan > plan.txt
 
-      # Fail if plan contains Destroy
       - name: Fail if plan contains Destroy
         working-directory: infra
         run: |
@@ -65,7 +56,6 @@ jobs:
           fi
           echo "✅ No destroys detected."
 
-      # Upload plan result as artifact
       - name: Upload plan result
         uses: actions/upload-artifact@v4
         with:
