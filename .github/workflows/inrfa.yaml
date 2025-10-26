@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write   # مهم لـ OIDC
+      id-token: write   # ضروري لـ OIDC
 
     env:
       TF_IN_AUTOMATION: "true"
@@ -19,7 +19,6 @@ jobs:
       ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
       ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
       ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-      # لا تستخدمي ARM_CLIENT_SECRET مع OIDC
 
     steps:
       - uses: actions/checkout@v4
@@ -43,6 +42,7 @@ jobs:
         id: plan
         working-directory: infra
         run: |
+          set -e
           terraform plan -out=plan.tfplan -no-color -detailed-exitcode || echo "exit_code=$?" >> $GITHUB_OUTPUT
           terraform show -no-color plan.tfplan > plan.txt
 
