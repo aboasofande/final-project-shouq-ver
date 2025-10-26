@@ -93,7 +93,7 @@ variable "subnet_pl_cidr" {
 variable "acr_name" {
   description = "Azure Container Registry name (must be unique globally)"
   type        = string
-  default     = "AA-grp3acr"
+  default     = "aagrp3acr"
 }
 
 ##############################################
@@ -125,13 +125,13 @@ variable "aks_vm_size" {
 variable "sql_server_name" {
   description = "SQL Server name"
   type        = string
-  default     = "AA-grp3sqlsrv"
+  default     = "aagrp3sqlsrv"
 }
 
 variable "sql_db_name" {
   description = "Database name"
   type        = string
-  default     = "AA-grp3db"
+  default     = "aagrp3db"
 }
 
 variable "sql_admin_login" {
