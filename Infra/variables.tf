@@ -5,7 +5,7 @@
 variable "prefix" {
   description = "Project prefix used for naming resources"
   type        = string
-  default     = "grp3"
+  default     = "AAtesting"
 }
 
 variable "location" {
@@ -17,16 +17,16 @@ variable "location" {
 variable "rg_name" {
   description = "Name of the Resource Group"
   type        = string
-  default     = "rg-grp3-aks"
+  default     = "AAtest-grp3-aks"
 }
 
 variable "tags" {
   description = "Common tags for all resources"
   type        = map(string)
   default = {
-    project = "3tier-aks"
-    env     = "dev"
-    team    = "group3"
+    project = "AA-3tier-aks"
+    env     = "AA-dev"
+    team    = "AA-group3"
   }
 }
 
@@ -37,7 +37,7 @@ variable "tags" {
 variable "vnet_name" {
   description = "Virtual Network name"
   type        = string
-  default     = "vnet-grp3"
+  default     = "AA-vnet-grp3"
 }
 
 variable "vnet_cidr" {
@@ -51,7 +51,7 @@ variable "vnet_cidr" {
 variable "subnet_appgw_name" {
   description = "Subnet for Application Gateway"
   type        = string
-  default     = "snet-appgw"
+  default     = "AA-snet-appgw"
 }
 
 variable "subnet_appgw_cidr" {
@@ -64,7 +64,7 @@ variable "subnet_appgw_cidr" {
 variable "subnet_aks_name" {
   description = "Subnet for AKS Cluster"
   type        = string
-  default     = "snet-aks"
+  default     = "AA-snet-aks"
 }
 
 variable "subnet_aks_cidr" {
@@ -77,7 +77,7 @@ variable "subnet_aks_cidr" {
 variable "subnet_pl_name" {
   description = "Subnet for Private Link"
   type        = string
-  default     = "snet-privatelink"
+  default     = "AA-snet-privatelink"
 }
 
 variable "subnet_pl_cidr" {
@@ -93,7 +93,7 @@ variable "subnet_pl_cidr" {
 variable "acr_name" {
   description = "Azure Container Registry name (must be unique globally)"
   type        = string
-  default     = "grp3acr"
+  default     = "AA-grp3acr"
 }
 
 ##############################################
@@ -103,7 +103,7 @@ variable "acr_name" {
 variable "aks_name" {
   description = "Azure Kubernetes Service cluster name"
   type        = string
-  default     = "aks-grp3"
+  default     = "AA-aks-grp3"
 }
 
 variable "aks_node_count" {
@@ -125,13 +125,13 @@ variable "aks_vm_size" {
 variable "sql_server_name" {
   description = "SQL Server name"
   type        = string
-  default     = "grp3sqlsrv"
+  default     = "AA-grp3sqlsrv"
 }
 
 variable "sql_db_name" {
   description = "Database name"
   type        = string
-  default     = "grp3db"
+  default     = "AA-grp3db"
 }
 
 variable "sql_admin_login" {

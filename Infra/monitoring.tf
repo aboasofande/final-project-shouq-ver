@@ -56,7 +56,7 @@ resource "azurerm_monitor_action_group" "devops_alerts" {
 
   email_receiver {
     name          = "admin-email"
-    email_address = "shouqaldous5@gmail.com"
+    email_address = "alrasheed.ab.b@gmail.com"
   }
 
   tags = var.tags
