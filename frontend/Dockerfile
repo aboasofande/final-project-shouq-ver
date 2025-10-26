@@ -1,7 +1,10 @@
 FROM node:22-alpine AS build
 WORKDIR /app
 
-ENV VITE_API_BASE_URL=__API_BASE_URL__
+#ENV VITE_API_BASE_URL="http://app.4.193.226.111.nip.io"
+
+ARG API_PLACEHOLDER="__API_BASE_URL__"
+ENV VITE_API_BASE_URL=$API_PLACEHOLDER
 
 ENV CI=true
 COPY package.json package-lock.json* ./

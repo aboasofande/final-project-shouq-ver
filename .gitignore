@@ -34,6 +34,39 @@ Infra/IaaC/3_realms/bourgerapp/staging/plan.out
 Infra/IaaC/without_modules/
 
 # GitHub Workflows
-.github/workflows/deploy.yaml
 .github/workflows/terraform-checks.yaml
 
+# Node / Frontend
+node_modules/
+dist/
+*.log
+
+# Backend (إذا فيه build artifacts)
+target/
+bin/
+.obj/
+
+# Docker
+.docker/
+**/.env
+.env*
+!.env.example
+
+# Terraform
+**/.terraform/
+**/.terraform.lock.hcl
+**/terraform.tfstate
+**/terraform.tfstate.*
+**/*.tfstate.backup
+**/crash.log
+**/plan.tfplan
+**/plan.txt
+
+# Kubernetes
+kubeconfig
+**/*secret*.yaml
+
+# IDE
+.vscode/
+.idea/
+.DS_Store

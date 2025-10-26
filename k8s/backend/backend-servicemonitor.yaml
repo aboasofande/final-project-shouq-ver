@@ -1,0 +1,18 @@
+# k8s/monitoring/backend-servicemonitor.yaml
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: backend-servicemonitor
+  namespace: monitoring
+  labels:
+    release: kps
+spec:
+  namespaceSelector:
+    matchNames: ["grp3"]
+  selector:
+    matchLabels:
+      app: backend
+  endpoints:
+    - port: http
+      path: /actuator/prometheus
+      interval: 15s

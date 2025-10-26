@@ -1,0 +1,74 @@
+# k8s/monitoring/backend-prom-rule.yaml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: backend-prom-rule
+  namespace: monitoring
+  labels:
+    release: kps    # مهم
+spec:
+  groups:
+  - name: backend-api.rules
+    rules:
+    # 5xx error rate ≥ 5% خلال 5 دقائق
+    - alert: BackendHigh5xxRate
+      expr: |
+        sum(rate(http_server_requests_seconds_count{outcome=~"SERVER_ERROR"}[5m]))
+        /
+        sum(rate(http_server_requests_seconds_count[5m])) > 0.05
+      for: 5m
+      labels: { severity: critical }
+      annotations:
+        summary: "High 5xx rate on backend"
+        description: "5xx > 5% over 5m"
+
+    # Latency p95 > 300ms خلال 5 دقائق
+    - alert: BackendHighLatencyP95
+      expr: |
+        histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket[5m])) by (le))
+        > 0.3
+      for: 5m
+      labels: { severity: warning }
+      annotations:
+        summary: "High p95 latency on backend"
+        description: "p95 > 300ms (5m)"
+
+    # Request rate (RPS) مرتفع جدًا (مؤشر تشبع)
+    - alert: BackendHighRequestRate
+      expr: sum(rate(http_server_requests_seconds_count[1m])) > 100
+      for: 2m
+      labels: { severity: info }
+      annotations:
+        summary: "High request rate to backend"
+        description: "RPS > 100 (1m avg) — check autoscaling"
+
+  - name: platform.rules
+    rules:
+    # CrashLoopBackOff
+    - alert: PodCrashLooping
+      expr: |
+        increase(kube_pod_container_status_restarts_total[5m]) > 3
+      for: 5m
+      labels: { severity: warning }
+      annotations:
+        summary: "Pod crash looping"
+        description: "Pod restarts > 3 in 5m"
+
+    # Unschedulable pods
+    - alert: PodUnschedulable
+      expr: kube_pod_status_unschedulable == 1
+      for: 10m
+      labels: { severity: warning }
+      annotations:
+        summary: "Pod unschedulable"
+        description: "Pod cannot be scheduled for 10m"
+
+    # HPA قريب/وصل الحد الأقصى
+    - alert: HPAAtMaxReplicas
+      expr: |
+        kube_hpa_status_current_replicas == kube_hpa_spec_max_replicas
+      for: 10m
+      labels: { severity: info }
+      annotations:
+        summary: "HPA at max replicas"
+        description: "Current replicas == max for 10m — consider scaling nodes or tuning HPA"

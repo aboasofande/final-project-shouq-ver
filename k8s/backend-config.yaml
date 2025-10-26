@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+  namespace: grp3
+data:
+  DB_HOST: grp3sqlsrv.privatelink.database.windows.net
+  DB_PORT: "1433"
+  DB_NAME: grp3db
+  DB_ENCRYPT: "true"
+  DB_TRUST_SERVER_CERTIFICATE: "true"
+  CORS_ORIGIN: http://app.4.193.226.111.nip.io

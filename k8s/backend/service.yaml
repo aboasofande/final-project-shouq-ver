@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  namespace: grp3
+  annotations:
+    appgw.ingress.kubernetes.io/health-probe-path: /actuator/health
+    appgw.ingress.kubernetes.io/health-probe-interval: "10"
+    appgw.ingress.kubernetes.io/health-probe-timeout: "5"
+    appgw.ingress.kubernetes.io/health-probe-unhealthy-threshold: "3"
+spec:
+  selector:
+    app: backend
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+  type: ClusterIP

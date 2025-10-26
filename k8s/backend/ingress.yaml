@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: grp3-backend
+  namespace: grp3
+  annotations:
+    appgw.ingress.kubernetes.io/request-timeout: "90"
+    appgw.ingress.kubernetes.io/health-probe-path: /actuator/health
+spec:
+  ingressClassName: azure-application-gateway
+  rules:
+    - host: app.4.193.226.111.nip.io
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: backend
+                port:
+                  number: 80

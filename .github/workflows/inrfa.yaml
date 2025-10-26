@@ -1,0 +1,57 @@
+name: Infra (Terraform)
+
+on:
+  pull_request:
+    paths: [ "infra/**/*.tf", "infra/**/*.tfvars" ]
+  workflow_dispatch:
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    env:
+      TF_IN_AUTOMATION: "true"
+      TF_INPUT: "false"
+      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+      ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure Login (SP)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.ARM_CLIENT_ID }}
+          tenant-id: ${{ secrets.ARM_TENANT_ID }}
+          subscription-id: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        working-directory: infra
+        run: terraform init -upgrade
+
+      - name: Terraform Plan (no apply)
+        id: plan
+        working-directory: infra
+        run: |
+          set -e
+          terraform plan -out=plan.tfplan -no-color -detailed-exitcode || echo "exit_code=$?" >> $GITHUB_OUTPUT
+          terraform show -no-color plan.tfplan > plan.txt
+
+      - name: Fail if plan contains Destroy
+        working-directory: infra
+        run: |
+          destroys=$(grep -Eo 'Destroy: [0-9]+' plan.txt | awk '{print $2}')
+          if [ -n "$destroys" ] && [ "$destroys" -gt 0 ]; then
+            echo "❌ Plan contains destroys ($destroys). Failing as requested."
+            exit 1
+          fi
+          echo "✅ No destroys."
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tf-plan
+          path: infra/plan.txt
