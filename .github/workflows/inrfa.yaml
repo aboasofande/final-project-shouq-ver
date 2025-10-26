@@ -7,7 +7,11 @@ on:
 
 jobs:
   plan:
+    name: Terraform Plan (no destroy gate)
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
     env:
       TF_IN_AUTOMATION: "true"
       TF_INPUT: "false"
@@ -17,23 +21,30 @@ jobs:
       ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
 
     steps:
-      - uses: actions/checkout@v4
+      # Checkout repo
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Azure Login (SP)
-        uses: azure/login@v2
+      # Azure login using Service Principal + secret
+      - name: Azure Login (Service Principal)
+        uses: azure/login@v1
         with:
           client-id: ${{ secrets.ARM_CLIENT_ID }}
           tenant-id: ${{ secrets.ARM_TENANT_ID }}
           subscription-id: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+          client-secret: ${{ secrets.ARM_CLIENT_SECRET }}
 
+      # Setup Terraform CLI
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
+      # Initialize Terraform
       - name: Terraform Init
         working-directory: infra
         run: terraform init -upgrade
 
-      - name: Terraform Plan (no apply)
+      # Run Terraform plan
+      - name: Terraform Plan
         id: plan
         working-directory: infra
         run: |
@@ -41,6 +52,7 @@ jobs:
           terraform plan -out=plan.tfplan -no-color -detailed-exitcode || echo "exit_code=$?" >> $GITHUB_OUTPUT
           terraform show -no-color plan.tfplan > plan.txt
 
+      # Fail if plan contains Destroy
       - name: Fail if plan contains Destroy
         working-directory: infra
         run: |
@@ -49,9 +61,11 @@ jobs:
             echo "❌ Plan contains destroys ($destroys). Failing as requested."
             exit 1
           fi
-          echo "✅ No destroys."
+          echo "✅ No destroys detected."
 
-      - uses: actions/upload-artifact@v4
+      # Upload plan result as artifact
+      - name: Upload plan result
+        uses: actions/upload-artifact@v4
         with:
           name: tf-plan
           path: infra/plan.txt
